@@ -1,0 +1,66 @@
+<body>
+  <style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 60%;
+        margin: 0 auto;
+    }
+
+    .question {
+        width: 50rem;
+        height: 10rem;
+        margin-bottom: 1rem;
+    }
+
+    .header {
+        width: 100%;
+        display: flex;
+        {#justify-content: space-between;#}
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .slogon {
+        display: flex;
+        flex-direction: column;
+        margin-left: 1rem;
+    }
+    .slogon span{
+        font-size: 1rem;
+    }
+    main{
+        width:100%
+    }
+    
+  </style>
+  <div class="container">
+    <div class="header">
+      <img
+        src="{{ url_for('static', filename='chatpdf.jpg') }}"
+        alt="chatpdf logo"
+        width="100"
+        height="100"
+      />
+      <div class="slogon">
+        <h1>ChatPDF</h1>
+        <span>Openness is the key to effective communication.</span>
+      </div>
+    </div>
+    <main>
+      <form method="POST">
+        <label for="question">Enter your question:</label><br />
+        <textarea class="question" id="question" name="question"></textarea>
+        <br />
+        <input type="submit" value="Submit" />
+      </form>
+      {% if result is defined %}
+      <h2>Answer</h2>
+      <p>{{ result.answer }}</p>
+      {% endif %}
+    </main>
+  </div>
+</body>
