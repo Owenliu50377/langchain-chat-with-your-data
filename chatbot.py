@@ -3,7 +3,8 @@ from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chat_models import AzureChatOpenAI
+# from langchain.chat_models import AzureChatOpenAI
+
 from langchain.chains import ConversationalRetrievalChain
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.chains.query_constructor.base import AttributeInfo
@@ -60,7 +61,7 @@ splits = text_splitter.split_documents(docs)
 print(f"The number of splits:{len(splits)}")
 # print(splits[0])
 
-# 向量库存储
+# 向量库存储 vector embedding
 embedding = OpenAIEmbeddings()
 
 persist_directory = 'docs/chroma/'
@@ -76,8 +77,13 @@ persist_directory = 'docs/chroma/'
 # vectordb.persist()
 
 # 已经保存到向量数据库，从数据库里读取
-vectordb = Chroma(persist_directory=persist_directory,
-                  embedding_function=embedding)
+vectordb = Chroma.from_documents(
+    documents= splits,
+    embedding= embedding,
+    persist_directory= persist_directory
+)
+vectordb.persist()
+
 print(vectordb._collection.count())
 
 # 检索
@@ -88,7 +94,7 @@ print(vectordb._collection.count())
 metadata_field_info = [
     AttributeInfo(
         name="source",
-        description="The lecture the chunk is from, should be one of `docs/cs229_lectures/MachineLearning-Lecture01.pdf`, `docs/cs229_lectures/MachineLearning-Lecture02.pdf`, or `docs/cs229_lectures/MachineLearning-Lecture03.pdf`",
+        description="The meta notes down the similar ",
         type="string",
     ),
     AttributeInfo(
