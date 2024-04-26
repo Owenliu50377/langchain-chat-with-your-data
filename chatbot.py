@@ -40,6 +40,8 @@ pdffiles = [
     "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年第4季度报告.PDF",
     "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年第一季度报告.PDF",
     "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年年度报告.PDF"
+    # "docs/cs229_lectures/test2.pdf"
+
 ]
 
 
@@ -54,9 +56,12 @@ print(f"The number of docs:{len(docs)}")
 
 # 文档分割
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1500,
-    chunk_overlap=150
+    chunk_size=150,
+    chunk_overlap=15
 )
+
+# chunk size smaller can be better fit chinese pdf??????
+
 splits = text_splitter.split_documents(docs)
 print(f"The number of splits:{len(splits)}")
 # print(splits[0])
@@ -129,7 +134,8 @@ memory = ConversationBufferMemory(
 )
 qa = ConversationalRetrievalChain.from_llm(
     llm=llm,
-    chain_type="stuff",
+    chain_type = "map_reduce"
+    # chain_type="stuff",
     retriever=self_query_retriever,
     # retriever=compression_retriever,
     memory=memory
