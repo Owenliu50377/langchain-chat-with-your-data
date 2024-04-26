@@ -9,24 +9,45 @@ from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.chains.query_constructor.base import AttributeInfo
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import LLMChainExtractor
+import warnings
 
+# 忽略特定类型的警告
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 # 用.env文件初始化环境变量
 from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())  # read local .env file
 
+
+import os
+import openai
+import sys
+sys.path.append('../..')
+
+from dotenv import load_dotenv, find_dotenv
+
+os.environ["OPENAI_API_BASE"] = 'https://api.xty.app/v1'
+os.environ["OPENAI_API_KEY"] = "sk-WcfAH2nafiPHdofn995509C97d7b49DcB03bCc76989b2dD3"
+_ = load_dotenv(find_dotenv()) # read local .env file
+
+openai.api_key  = os.environ["OPENAI_API_KEY"]
 # 加载文档
 pdffiles = [
-    "docs/cs229_lectures/MachineLearning-Lecture01.pdf",
-    "docs/cs229_lectures/MachineLearning-Lecture01.pdf",  # 故意重复以模拟杂乱数据
-    "docs/cs229_lectures/MachineLearning-Lecture02.pdf",
-    "docs/cs229_lectures/MachineLearning-Lecture03.pdf"
+    "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年中期报告.PDF",
+    "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年第2季度报告.PDF",
+    "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年第3季度报告.PDF",
+    "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年第4季度报告.PDF",
+    "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年第一季度报告.PDF",
+    "docs/cs229_lectures/东方新能源汽车主题混合型证券投资基金2023年年度报告.PDF"
 ]
+
+
+
 docs = []
 for file_path in pdffiles:
     loader = PyPDFLoader(file_path)
     docs.extend(loader.load())
-
+ 
 print(f"The number of docs:{len(docs)}")
 # print(docs[0])
 
@@ -41,6 +62,7 @@ print(f"The number of splits:{len(splits)}")
 
 # 向量库存储
 embedding = OpenAIEmbeddings()
+
 persist_directory = 'docs/chroma/'
 
 # 由于接口限制，每次只能传16个文本块，需要循环分批传入
@@ -62,6 +84,7 @@ print(vectordb._collection.count())
 # define retriever
 # base_retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 # base_retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={'k': 5, 'fetch_k': 10})
+
 metadata_field_info = [
     AttributeInfo(
         name="source",
@@ -75,14 +98,18 @@ metadata_field_info = [
     ),
 ]
 document_content_description = "Lecture notes"
-llm = AzureChatOpenAI(deployment_name="GPT-4", temperature=0)
+
+
+from langchain.chat_models import ChatOpenAI
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+# llm = AzureChatOpenAI(deployment_name="GPT-4", temperature=0)
 self_query_retriever = SelfQueryRetriever.from_llm(
     llm,
     vectordb,
     document_content_description,
     metadata_field_info,
     search_type="mmr",
-    search_kwargs={'k': 5, 'fetch_k': 10},
+    search_kwargs={'k': 7, 'fetch_k': 10},
     verbose=True
 )
 compressor = LLMChainExtractor.from_llm(llm)
@@ -116,6 +143,7 @@ from flask import Flask, request, render_template
 app = Flask(__name__)  # Flask APP
 
 @app.route('/', methods=['GET', 'POST'])
+
 def home():
     if request.method == 'POST':
         # 接收用户输入作为问题
